@@ -33,7 +33,7 @@ jobs:
 
       # Copy the built files into the destination repository
       - name: Copy built files
-        run: cp -a build/. destination
+        run: cp -a dist/. destination
 
       # Commit and push changes to the destination repository
       - name: Commit and push changes
