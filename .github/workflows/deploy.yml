@@ -1,0 +1,46 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Build your React app
+      - name: Build
+        run: npm install && npm run build
+        
+      # Add eslint ignore and continue with deploy
+      - name: Ignore eslint warnings and deploy
+        run: |
+          npm install eslint --save-dev
+          npx eslint src --ignore-path .eslintignore --quiet || true
+
+      # Clone the destination repository
+      - name: Clone destination repository
+        uses: actions/checkout@v4
+        with:
+          repository: roslyndev/roslyndev.github.io
+          token: ${{ secrets.MY_GITHUB_TOKEN }} # Use the GitHub token from secrets for authentication
+          path: destination # Specify the folder name to clone into
+
+      # Copy the built files into the destination repository
+      - name: Copy built files
+        run: cp -a build/. destination
+
+      # Commit and push changes to the destination repository
+      - name: Commit and push changes
+        run: |
+          cd destination
+          git config --local user.email "yunlang97@gmail.com"
+          git config --local user.name "parkheesung"
+          git add .
+          git commit -m "Deploy latest build from roslyndev/withSinwoo repository"
+          git push origin main
